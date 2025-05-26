@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSA Cryptography Simulator</title>
+    <!-- Add MathJax with configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            svg: {
+                fontCache: 'global'
+            },
+            options: {
+                enableMenu: false
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #4ecca3;
+        }
+
+        .header p {
+            color: #eeeeee;
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            background: rgba(78, 204, 163, 0.1);
+            padding: 2rem 2rem 1.5rem 2rem;
+            border-radius: 10px;
+            margin: 2rem auto;
+            max-width: 800px;
+        }
+
+        .info-box p:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .info-box .technique-info {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(78, 204, 163, 0.2);
+            font-style: italic;
+            color: #4ecca3;
+        }
+
+        .prime-range {
+            background: rgba(78, 204, 163, 0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            border: 1px solid rgba(78, 204, 163, 0.2);
+        }
+
+        .prime-range h4 {
+            color: #4ecca3;
+            margin-bottom: 0.5rem;
+        }
+
+        .prime-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .prime-number {
+            background: rgba(78, 204, 163, 0.1);
+            padding: 0.3rem;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .prime-number:hover {
+            background: rgba(78, 204, 163, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .info-box h3 {
+            color: #4ecca3;
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+        }
+
+        .info-box p {
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+            color: #f0f0f0;
+        }
+
+        .info-box ul {
+            margin: 1.5rem 0;
+            padding-left: 2rem;
+            list-style-type: disc;
+        }
+
+        .info-box li {
+            margin-bottom: 1rem;
+            line-height: 1.8;
+            color: #f0f0f0;
+        }
+
+        .info-box li::marker {
+            color: #4ecca3;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #4ecca3;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .help-icon {
+            cursor: pointer;
+            color: #4ecca3;
+            font-size: 1.2rem;
+            transition: color 0.3s;
+        }
+
+        .help-icon:hover {
+            color: #45b393;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 300px;
+            background-color: #333;
+            color: #fff;
+            text-align: left;
+            border-radius: 6px;
+            padding: 1rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #4ecca3;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .input-help {
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #4ecca3;
+            cursor: pointer;
+        }
+
+        .btn {
+            background: #4ecca3;
+            color: #1a1a2e;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #45b393;
+            transform: translateY(-2px);
+        }
+
+        .result {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(78, 204, 163, 0.1);
+            border-radius: 8px;
+        }
+
+        .steps-container {
+            margin-top: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 15px;
+        }
+
+        .steps-container h2 {
+            color: #4ecca3;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .step {
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            line-height: 1.6;
+        }
+
+        .step h3 {
+            color: #4ecca3;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .step-phase {
+            background: rgba(78, 204, 163, 0.1);
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin-left: auto;
+        }
+
+        .step ol {
+            margin-left: 1.5rem;
+            counter-reset: step-counter;
+        }
+
+        .step li {
+            margin-bottom: 1rem;
+            position: relative;
+            padding-left: 2rem;
+            counter-increment: step-counter;
+        }
+
+        .step li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: -5px;
+            top: 0;
+            width: 25px;
+            height: 25px;
+            background: rgba(78, 204, 163, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: #4ecca3;
+        }
+
+        .step-explanation {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #aaa;
+            padding-left: 1rem;
+            border-left: 2px solid rgba(78, 204, 163, 0.2);
+        }
+
+        .formula {
+            background: rgba(78, 204, 163, 0.05);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+            font-family: monospace;
+            display: inline-block;
+        }
+
+        .visualization {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .process-flow {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .process-step {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(78, 204, 163, 0.1);
+            border-radius: 8px;
+            min-width: 200px;
+        }
+
+        .process-step h4 {
+            color: #4ecca3;
+            margin-bottom: 0.5rem;
+        }
+
+        .arrow {
+            color: #4ecca3;
+            font-size: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .card-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>RSA Cryptography Simulator</h1>
+            <p>Welcome to the RSA Cryptography Simulator! This interactive tool helps you understand how RSA encryption works using the decrease and conquer algorithm approach.</p>
+        </div>
+
+        <div class="info-box">
+            <h3>What is RSA Encryption?</h3>
+            <p>RSA (Rivest-Shamir-Adleman) is a public-key cryptosystem widely used for secure data transmission. It uses two keys:</p>
+            <ul>
+                <li>A public key for encryption (anyone can use this)</li>
+                <li>A private key for decryption (kept secret by the owner)</li>
+            </ul>
+            <p>The security of RSA relies on the practical difficulty of factoring the product of two large prime numbers.</p>
+            <p class="technique-info">The RSA algorithm employs the decrease and conquer technique by breaking down complex mathematical operations into smaller, manageable steps. This includes reducing large exponentiation problems through modular arithmetic and finding the greatest common divisor using the Euclidean algorithm.</p>
+        </div>
+
+        <div class="visualization" style="margin: 3rem auto; max-width: 900px; background: rgba(78, 204, 163, 0.05); padding: 2rem; border-radius: 15px;">
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #4ecca3;">Process Visualization</h2>
+            <div class="process-flow">
+                <div class="process-step">
+                    <h4>Key Generation</h4>
+                    <p>p, q → n, φ(n)</p>
+                </div>
+                <div class="arrow">→</div>
+                <div class="process-step">
+                    <h4>Public Key</h4>
+                    <p>(e, n)</p>
+                </div>
+                <div class="arrow">→</div>
+                <div class="process-step">
+                    <h4>Encryption</h4>
+                    <p>c = m<sup>e</sup> mod n</p>
+                </div>
+                <div class="arrow">→</div>
+                <div class="process-step">
+                    <h4>Decryption</h4>
+                    <p>m = c<sup>d</sup> mod n</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="card">
+                <h2>
+                    Key Generation
+                    <div class="tooltip">
+                        <span class="help-icon">ℹ️</span>
+                        <span class="tooltip-text">
+                            Generate your public and private keys by entering two prime numbers.
+                            Choose numbers from the suggested range below for best results.
+                        </span>
+                    </div>
+                </h2>
+                <div class="prime-range">
+                    <h4>Recommended Prime Number Ranges:</h4>
+                    <p>For learning and small messages: 5 to 97</p>
+                    <p>For regular text messages: 11 to 97</p>
+                    <div class="prime-list" id="small-primes"></div>
+                </div>
+                <div class="input-group">
+                    <label for="prime-p">Prime Number p:</label>
+                    <input type="number" id="prime-p" placeholder="Enter a prime number (e.g., 11)">
+                    <div class="tooltip input-help">
+                        <span>ℹ️</span>
+                        <span class="tooltip-text">Choose a prime number from the list above.</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="prime-q">Prime Number q:</label>
+                    <input type="number" id="prime-q" placeholder="Enter a prime number (e.g., 7)">
+                    <div class="tooltip input-help">
+                        <span>ℹ️</span>
+                        <span class="tooltip-text">Choose another prime number different from p.</span>
+                    </div>
+                </div>
+                <button class="btn" onclick="generateKeys()">Generate Keys</button>
+                <div class="result" id="key-result"></div>
+            </div>
+
+            <div class="card-container">
+                <div class="card">
+                    <h2>
+                        Encryption
+                        <div class="tooltip">
+                            <span class="help-icon">ℹ️</span>
+                            <span class="tooltip-text">
+                                Enter your message to encrypt it using the public key.
+                                Anyone with the public key can encrypt messages.
+                            </span>
+                        </div>
+                    </h2>
+                    <div class="input-group">
+                        <label for="message">Message to Encrypt:</label>
+                        <input type="text" id="message" placeholder="Enter your message to encrypt">
+                    </div>
+                    <button class="btn" onclick="encrypt()">Encrypt Message</button>
+                    <div class="result" id="encryption-result"></div>
+                </div>
+
+                <div class="card">
+                    <h2>
+                        Decryption
+                        <div class="tooltip">
+                            <span class="help-icon">ℹ️</span>
+                            <span class="tooltip-text">
+                                Enter the encrypted message to decrypt it using the private key.
+                                Only someone with the private key can decrypt messages.
+                            </span>
+                        </div>
+                    </h2>
+                    <div class="input-group">
+                        <label for="encrypted-message">Encrypted Message:</label>
+                        <input type="text" id="encrypted-message" placeholder="Enter the encrypted numbers, separated by commas">
+                    </div>
+                    <button class="btn" onclick="decryptManual()">Decrypt Message</button>
+                    <div class="result" id="decryption-result"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="steps-container">
+            <h2>Algorithm Steps</h2>
+            <div id="steps" class="step"></div>
+        </div>
+    </div>
+
+    <script>
+        // RSA Algorithm Implementation using Decrease and Conquer
+        function isPrime(num) {
+            if (num <= 1) return false;
+            if (num <= 3) return true;
+            if (num % 2 === 0 || num % 3 === 0) return false;
+            
+            // Decrease and conquer: Check divisibility up to square root
+            // Using 6k ± 1 optimization
+            for (let i = 5; i * i <= num; i += 6) {
+                if (num % i === 0 || num % (i + 2) === 0) return false;
+            }
+            return true;
+        }
+
+        function findNextPrime(num) {
+            while (!isPrime(num)) {
+                num++;
+            }
+            return num;
+        }
+
+        function generateSmallPrimes(start, end) {
+            const primes = [];
+            for (let num = start; num <= end; num++) {
+                if (isPrime(num)) {
+                    primes.push(num);
+                }
+            }
+            return primes;
+        }
+
+        function selectPrime(value, inputId) {
+            document.getElementById(inputId).value = value;
+        }
+
+        // Initialize small primes list
+        window.onload = function() {
+            const smallPrimes = generateSmallPrimes(5, 97);
+            const primesList = document.getElementById('small-primes');
+            
+            smallPrimes.forEach(prime => {
+                const primeElement = document.createElement('div');
+                primeElement.className = 'prime-number';
+                primeElement.textContent = prime;
+                primeElement.onclick = () => {
+                    // If p is empty, fill p, otherwise fill q
+                    const pInput = document.getElementById('prime-p');
+                    const qInput = document.getElementById('prime-q');
+                    if (!pInput.value) {
+                        selectPrime(prime, 'prime-p');
+                    } else if (!qInput.value && prime !== parseInt(pInput.value)) {
+                        selectPrime(prime, 'prime-q');
+                    }
+                };
+                primesList.appendChild(primeElement);
+            });
+        };
+
+        function validatePrimeInput(p, q) {
+            const errors = [];
+            
+            if (!p || !q) {
+                errors.push("Both prime numbers are required");
+                return errors;
+            }
+
+            if (!Number.isInteger(p) || !Number.isInteger(q)) {
+                errors.push("Please enter whole numbers only");
+                return errors;
+            }
+
+            if (p === q) {
+                errors.push("Please use different prime numbers");
+                return errors;
+            }
+
+            if (p < 5 || q < 5) {
+                errors.push("Please use prime numbers 5 or larger");
+            }
+
+            if (!isPrime(p)) {
+                errors.push(`${p} is not a prime number`);
+            }
+
+            if (!isPrime(q)) {
+                errors.push(`${q} is not a prime number`);
+            }
+
+            if (p * q > Number.MAX_SAFE_INTEGER) {
+                errors.push("The product of these primes is too large. Please use smaller numbers");
+            }
+
+            return errors;
+        }
+
+        function gcd(a, b) {
+            // Decrease and conquer: Euclidean algorithm
+            while (b !== 0) {
+                const temp = b;
+                b = a % b;
+                a = temp;
+            }
+            return a;
+        }
+
+        function modInverse(e, phi) {
+            // Decrease and conquer: Extended Euclidean algorithm
+            let m0 = phi;
+            let y = 0;
+            let x = 1;
+
+            if (phi === 1) return 0;
+
+            while (e > 1) {
+                const q = Math.floor(e / phi);
+                let t = phi;
+                phi = e % phi;
+                e = t;
+                t = y;
+                y = x - q * y;
+                x = t;
+            }
+
+            if (x < 0) x += m0;
+            return x;
+        }
+
+        function modPow(base, exponent, modulus) {
+            // Decrease and conquer: Square and multiply algorithm
+            if (modulus === 1) return 0;
+            
+            let result = 1;
+            base = base % modulus;
+            
+            while (exponent > 0) {
+                if (exponent % 2 === 1) {
+                    result = (result * base) % modulus;
+                }
+                base = (base * base) % modulus;
+                exponent = Math.floor(exponent / 2);
+            }
+            
+            return result;
+        }
+
+        let publicKey = { e: 0, n: 0 };
+        let privateKey = { d: 0, n: 0 };
+
+        function generateKeys() {
+            const p = parseInt(document.getElementById('prime-p').value);
+            const q = parseInt(document.getElementById('prime-q').value);
+
+            const errors = validatePrimeInput(p, q);
+            if (errors.length > 0) {
+                document.getElementById('key-result').innerHTML = `
+                    <div style="color: #ff6b6b;">
+                        <strong>Errors:</strong>
+                        <ul style="margin-top: 0.5rem;">
+                            ${errors.map(error => `<li>${error}</li>`).join('')}
+                        </ul>
+                        <div style="margin-top: 1rem;">
+                            Try these prime number pairs:
+                            <ul style="margin-top: 0.5rem;">
+                                <li>17 and 11</li>
+                                <li>23 and 19</li>
+                                <li>31 and 37</li>
+                                <li>41 and 43</li>
+                                <li>53 and 59</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const n = p * q;
+            const phi = (p - 1) * (q - 1);
+            
+            // Choose e: coprime with phi(n) and less than phi(n)
+            let e = 65537; // Start with Fermat number F4 (common choice)
+            if (e >= phi) {
+                // If phi is small, start with a smaller number
+                e = 3;
+                while (gcd(e, phi) !== 1 && e < phi) {
+                    e = findNextPrime(e + 1);
+                }
+            }
+            
+            if (e >= phi || gcd(e, phi) !== 1) {
+                document.getElementById('key-result').innerHTML = `
+                    <div style="color: #ff6b6b;">
+                        Error: Could not generate valid keys with these prime numbers.
+                        Please try different prime numbers.
+                    </div>
+                `;
+                return;
+            }
+
+            // Calculate d: modular multiplicative inverse of e modulo phi
+            const d = modInverse(e, phi);
+            
+            if (d === 0) {
+                document.getElementById('key-result').innerHTML = `
+                    <div style="color: #ff6b6b;">
+                        Error: Could not calculate valid private key.
+                        Please try different prime numbers.
+                    </div>
+                `;
+                return;
+            }
+
+            publicKey = { e, n };
+            privateKey = { d, n };
+
+            document.getElementById('key-result').innerHTML = `
+                <div style="margin-bottom: 1rem;">
+                    <strong style="color: #4ecca3;">Success!</strong> Keys generated:
+                </div>
+                <div class="calculation-steps" style="background: rgba(78, 204, 163, 0.05); padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
+                    <h4 style="color: #4ecca3; margin-bottom: 1rem;">Step-by-Step Calculation:</h4>
+                    <ol style="list-style-type: decimal; padding-left: 1.5rem;">
+                        <li style="margin-bottom: 1.2rem;">
+                            <strong>Selected Prime Numbers:</strong><br>
+                            $p = ${p}$, $q = ${q}$
+                        </li>
+                        <li style="margin-bottom: 1.2rem;">
+                            <strong>Calculate n (modulus):</strong><br>
+                            $n = p \\times q = ${p} \\times ${q} = ${n}$
+                        </li>
+                        <li style="margin-bottom: 1.2rem;">
+                            <strong>Calculate φ(n) (Euler's totient):</strong><br>
+                            $\\phi(n) = (p - 1) \\times (q - 1)$<br>
+                            $\\phi(n) = (${p} - 1) \\times (${q} - 1)$<br>
+                            $\\phi(n) = ${p-1} \\times ${q-1} = ${phi}$
+                            <div class="process-note" style="font-size: 0.9rem; color: #aaa; margin-top: 0.5rem; padding-left: 1rem; border-left: 2px solid #4ecca3;">
+                                This simplifies the problem by reducing it from counting all coprime numbers to just using the prime factors' properties.
+                            </div>
+                        </li>
+                        <li style="margin-bottom: 1.2rem;">
+                            <strong>Choose e (public exponent):</strong><br>
+                            e must be coprime with $\\phi(n) = ${phi}$<br>
+                            <div class="coprime-check" style="background: rgba(78, 204, 163, 0.1); padding: 1rem; border-radius: 4px; margin: 0.5rem 0;">
+                                <strong>Coprime Check Process:</strong><br>
+                                Two numbers are coprime if their GCD = 1<br>
+                                Using Euclidean Algorithm (decrease and conquer):<br>
+                                ${generateGCDSteps(e, phi)}
+                                Therefore, $\\gcd(${e}, ${phi}) = 1$
+                            </div>
+                            Selected $e = ${e}$
+                        </li>
+                        <li style="margin-bottom: 1.2rem;">
+                            <strong>Calculate d (private exponent):</strong><br>
+                            d = modular multiplicative inverse of e mod φ(n)<br>
+                            $d \\times ${e} \\equiv 1 \\pmod{${phi}}$<br>
+                            <div class="mod-inverse-calc" style="background: rgba(78, 204, 163, 0.1); padding: 1rem; border-radius: 4px; margin: 0.5rem 0;">
+                                <strong>Extended Euclidean Algorithm (decrease and conquer):</strong><br>
+                                ${generateModInverseSteps(e, phi)}
+                            </div>
+                            <div class="verification" style="font-size: 0.9rem; margin-top: 0.5rem;">
+                                Verification: $${e} \\times ${d} \\bmod ${phi} = ${(e * d) % phi} \\equiv 1$
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+                <div style="background: rgba(78, 204, 163, 0.1); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                    <div style="margin-bottom: 0.5rem;">
+                        <strong style="color: #4ecca3;">Final Keys:</strong>
+                    </div>
+                    <div style="margin-bottom: 0.5rem;">
+                        Public Key (e,n): $(${e}, ${n})$
+                    </div>
+                    <div>
+                        Private Key (d,n): $(${d}, ${n})$
+                    </div>
+                </div>
+                <div style="margin-top: 1rem; font-size: 0.9rem; color: #aaa;">
+                    The public key is used for encryption, while the private key is used for decryption.
+                </div>
+            `;
+
+            // Trigger MathJax to process the new content
+            MathJax.typesetPromise();
+
+            updateSteps('Key Generation', [
+                'Selected prime numbers p and q for the key generation process',
+                `Calculated modulus n = p × q = ${n} (public component)`,
+                `Calculated Euler's totient φ(n) = (p-1) × (q-1) = ${phi} (kept secret)`,
+                `Selected public exponent e = ${e} (must be coprime to φ(n))`,
+                `Calculated private exponent d = ${d} (modular multiplicative inverse)`,
+                'Verified the key relationship: e × d ≡ 1 (mod φ(n))'
+            ]);
+        }
+
+        // Helper function to generate GCD calculation steps with proper math formatting
+        function generateGCDSteps(a, b) {
+            let steps = [];
+            let originalA = a;
+            let originalB = b;
+            
+            while (b !== 0) {
+                steps.push(`$\\gcd(${a}, ${b}): ${a} = ${b} \\times ${Math.floor(a/b)} + ${a % b}$`);
+                const temp = b;
+                b = a % b;
+                a = temp;
+            }
+            
+            return `${steps.map(step => step + '<br>').join('')}
+                    $\\gcd(${originalA}, ${originalB}) = ${a}$`;
+        }
+
+        // Helper function to generate modular inverse calculation steps with proper math formatting
+        function generateModInverseSteps(a, m) {
+            let m0 = m;
+            let y = 0;
+            let x = 1;
+            let steps = [];
+            
+            if (m === 1) return "$1$";
+            
+            let originalA = a;
+            let originalM = m;
+            
+            while (a > 1) {
+                let q = Math.floor(a / m);
+                let t = m;
+                
+                steps.push(`$${a} = ${m} \\times ${q} + ${a % m}$`);
+                steps.push(`$x = ${x}, y = ${y}$`);
+                
+                m = a % m;
+                a = t;
+                t = y;
+                
+                y = x - q * y;
+                x = t;
+            }
+            
+            if (x < 0) x += m0;
+            
+            return `${steps.map(step => step + '<br>').join('')}
+                    Final $x = ${x}$ (This is our d value)<br>
+                    Verification: $${originalA} \\times ${x} \\equiv 1 \\pmod{${originalM}}$`;
+        }
+
+        function encrypt() {
+            const message = document.getElementById('message').value;
+            if (!message) {
+                document.getElementById('encryption-result').innerHTML = `
+                    <div style="color: #ff6b6b;">Please enter a message to encrypt!</div>
+                `;
+                return;
+            }
+
+            if (publicKey.e === 0 || publicKey.n === 0) {
+                document.getElementById('encryption-result').innerHTML = `
+                    <div style="color: #ff6b6b;">Please generate keys first!</div>
+                `;
+                return;
+            }
+
+            try {
+                const encrypted = Array.from(message).map(char => {
+                    const m = char.charCodeAt(0);
+                    if (m >= publicKey.n) {
+                        throw new Error(`Character '${char}' has ASCII value ${m} which is too large for the current key size (n=${publicKey.n}). Try using larger prime numbers.`);
+                    }
+                    return modPow(m, publicKey.e, publicKey.n);
+                });
+
+                document.getElementById('encryption-result').innerHTML = `
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: #4ecca3;">Original Message:</strong> ${message}
+                    </div>
+                    <div>
+                        <strong style="color: #4ecca3;">Encrypted:</strong> ${encrypted.join(', ')}
+                    </div>
+                    <div style="margin-top: 1rem; font-size: 0.9rem; color: #aaa;">
+                        Key size (n) = ${publicKey.n}
+                    </div>
+                `;
+
+                updateSteps('Encryption', [
+                    'Converting each message character to its ASCII numeric value',
+                    `Using public key components: e = ${publicKey.e}, n = ${publicKey.n}`,
+                    'Applying encryption formula: c = m^e mod n for each value',
+                    'Combining encrypted values into the final ciphertext'
+                ]);
+            } catch (error) {
+                document.getElementById('encryption-result').innerHTML = `
+                    <div style="color: #ff6b6b;">Error: ${error.message}</div>
+                `;
+            }
+        }
+
+        function decryptManual() {
+            const encryptedInput = document.getElementById('encrypted-message').value;
+            
+            if (!encryptedInput) {
+                document.getElementById('decryption-result').innerHTML = `
+                    <div style="color: #ff6b6b;">Please enter the encrypted message!</div>
+                `;
+                return;
+            }
+
+            if (privateKey.d === 0 || privateKey.n === 0) {
+                document.getElementById('decryption-result').innerHTML = `
+                    <div style="color: #ff6b6b;">Please generate keys first!</div>
+                `;
+                return;
+            }
+
+            try {
+                const encrypted = encryptedInput.split(',').map(num => parseInt(num.trim()));
+                
+                if (encrypted.some(isNaN)) {
+                    throw new Error('Invalid input format');
+                }
+
+                const decrypted = encrypted.map(c => 
+                    String.fromCharCode(modPow(c, privateKey.d, privateKey.n))
+                ).join('');
+
+                document.getElementById('decryption-result').innerHTML = `
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: #4ecca3;">Encrypted Input:</strong> ${encryptedInput}
+                    </div>
+                    <div>
+                        <strong style="color: #4ecca3;">Decrypted Message:</strong> ${decrypted}
+                    </div>
+                `;
+
+                updateSteps('Decryption', [
+                    `Using private key components: d = ${privateKey.d}, n = ${privateKey.n}`,
+                    'Applying decryption formula: m = c^d mod n for each value',
+                    'Converting decrypted numeric values back to ASCII characters',
+                    'Reconstructing the original message from the characters'
+                ]);
+            } catch (error) {
+                document.getElementById('decryption-result').innerHTML = `
+                    <div style="color: #ff6b6b;">Error: Please enter valid encrypted numbers separated by commas!</div>
+                `;
+            }
+        }
+
+        function updateSteps(title, steps) {
+            const getPhaseLabel = (title) => {
+                switch(title) {
+                    case 'Key Generation': return 'Setup Phase';
+                    case 'Encryption': return 'Encryption Phase';
+                    case 'Decryption': return 'Decryption Phase';
+                    default: return '';
+                }
+            };
+
+            const getStepExplanation = (step, title) => {
+                if (step.includes('prime numbers')) {
+                    return 'Prime numbers are the foundation of RSA security. They must be kept secret during key generation.';
+                } else if (step.includes('n = p × q')) {
+                    return 'The modulus n is public and used in both keys. Its factors (p and q) must remain secret.';
+                } else if (step.includes('φ(n)')) {
+                    return 'Euler\'s totient function φ(n) counts numbers coprime to n. For prime numbers p and q, φ(n) = (p-1)(q-1).';
+                } else if (step.includes('Selected e')) {
+                    return 'The public exponent e must be coprime to φ(n). Common choices are 65537 or small primes like 3, 5, or 17.';
+                } else if (step.includes('Calculated d')) {
+                    return 'The private exponent d is the modular multiplicative inverse of e modulo φ(n). This is calculated using the extended Euclidean algorithm.';
+                } else if (step.includes('ASCII')) {
+                    return 'Each character is converted to its ASCII numeric value before encryption. This allows text to be treated as numbers.';
+                } else if (step.includes('c = m^e mod n')) {
+                    return 'The encryption formula uses modular exponentiation to transform the message into ciphertext.';
+                } else if (step.includes('m = c^d mod n')) {
+                    return 'The decryption formula recovers the original message using the private exponent d.';
+                }
+                return '';
+            };
+
+            const getFormula = (step) => {
+                if (step.includes('φ(n)')) {
+                    return 'φ(n) = (p-1)(q-1)';
+                } else if (step.includes('c = m^e mod n')) {
+                    return 'c ≡ m^e (mod n)';
+                } else if (step.includes('m = c^d mod n')) {
+                    return 'm ≡ c^d (mod n)';
+                } else if (step.includes('e × d')) {
+                    return 'e × d ≡ 1 (mod φ(n))';
+                }
+                return '';
+            };
+
+            const stepsHtml = `
+                <h2>
+                    ${title}
+                    <span class="step-phase">${getPhaseLabel(title)}</span>
+                </h2>
+                <ol>
+                    ${steps.map(step => {
+                        const explanation = getStepExplanation(step, title);
+                        const formula = getFormula(step);
+                        return `
+                            <li>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span>${step}</span>
+                                </div>
+                                ${formula ? `<div class="formula">${formula}</div>` : ''}
+                                ${explanation ? `<div class="step-explanation">${explanation}</div>` : ''}
+                            </li>
+                        `;
+                    }).join('')}
+                </ol>
+            `;
+            document.getElementById('steps').innerHTML = stepsHtml;
+        }
+    </script>
+</body>
+</html>
